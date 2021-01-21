@@ -1,5 +1,5 @@
 
-package DodgeBallClient;
+package dodgeBallClient;
 
 import java.io.*;
 import java.net.*;
@@ -15,10 +15,12 @@ public class Client {
 	public static boolean firstTime = true;
 	private static boolean connected = false;
 
-	public static void startConnection(String ip) throws IOException, InterruptedException {
+	//Label:starts tcp connection, then runs udp
+	public static void startConnection(String tryip) throws IOException, InterruptedException {
 		//default ip (school)
-		if(ip == null)
-			ip = "10.21.24.220";
+		if(tryip == null || tryip.length() == 0)
+			tryip = "10.21.18.38";
+		ip = tryip;
 		try {
 			clientSocket = new Socket(ip, port);
 			in = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
@@ -30,6 +32,7 @@ public class Client {
 		}
 	}
 
+	//Label:gets menu info from server, stores in clientMain
 	public static void getMenuInfo() throws IOException {
 		//scores and settings
 		in.read(menuInfo);
@@ -40,14 +43,17 @@ public class Client {
 		}
 	}
 
+	//Label: stores location info from clientmain
 	public static void setLocationInfo(byte[] buf) {
 		locationInfo = buf;
 	}
 
+	//Label: sets playing to not notMenuOn
 	public static void setPlaying(boolean notMenuOn) {
 		playing = notMenuOn;
 	}
 
+	//Label:runs udp, if done then tcp and rerun
 	public static void run() throws IOException, InterruptedException {
 		firstTime = true;
 		getMenuInfo();
@@ -74,11 +80,11 @@ public class Client {
 						ClientMain.storeInfo(packet.getData());
 					}
 					catch(SocketTimeoutException e) {
+						//XXX delete exception? timeout is ok to happen
 						connected = false;
 						playing = false;
 						ClientMain.disconnectToMenu();
 					}
-
 				}
 			}
 			if(connected) {

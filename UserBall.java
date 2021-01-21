@@ -12,6 +12,7 @@ public class UserBall{
 	public final static int NORMAL_DIAMETER = 40;
 	public static int speed;
 	public final static int FAST = 8;
+	public final static int REALLY_FAST = 16;
 	public final static int NORMAL_SPEED = 4;
 	private int shieldWidth = 4;
 	private Color c;

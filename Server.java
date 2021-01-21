@@ -15,9 +15,12 @@ public class Server extends Thread{
 	private int port;
 	private boolean running;
 
+	//Label:public constructor
 	public Server(int port) throws SocketException {
 		this("Server", port);
 	}
+	
+	//Label:private constructor
 	private Server(String name, int port) throws SocketException {
 		super(name);
 		try {
@@ -28,6 +31,7 @@ public class Server extends Thread{
 		}
 		this.port = port;
 	}
+	
 	//udp
 	public void run() {
 		while(true) {
@@ -74,10 +78,12 @@ public class Server extends Thread{
 		}
 	}
 
+	//Label: does start
 	public void doStart() throws IOException {
 		start(4446);
 	}
 
+	//Label:tries to reconnect
 	private boolean reconnectTry() throws IOException {
 		try {
 			serverSocket = new ServerSocket(this.port);
@@ -94,10 +100,12 @@ public class Server extends Thread{
 		}
 	}
 
+	//Label: reconnects
 	public void reconnect() throws IOException {
 		while(!reconnectTry()) {};
 	}
 
+	//Label:closes socket stuff
 	public void close() throws IOException {
 		serverSocket.close();
 		clientSocket.close();
@@ -105,6 +113,7 @@ public class Server extends Thread{
 		in.close();
 	}
 
+	//Label:sends settings to client
 	public void sendSettings(byte[] settings) throws IOException {
 		try {
 			out.write(settings);
@@ -116,6 +125,7 @@ public class Server extends Thread{
 
 	}
 
+	//Label:sends scores to client
 	public void sendScores(byte[] scores) throws IOException {
 		//sends weaveHighScore and score
 		try {
@@ -126,16 +136,19 @@ public class Server extends Thread{
 		}
 	}
 
+	//Label:sets ball info from courtserver
 	public void setBallInfo(byte[] buf) {
 		//balls locations
 		ballLocs = buf;
 	}
 
+	//Label:sets other info from courtserver
 	public void setInfo(byte[] buf) {
 		//sends you, width, hairWaves, shielded, shrink, speed, countDown, pause, menu, and score
 		info = buf;
 	}
 
+	//Label: sets running true
 	public void setRunning(boolean run) {
 		running = run;
 	}

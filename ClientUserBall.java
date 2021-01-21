@@ -1,4 +1,4 @@
-package DodgeBallClient;
+package dodgeBallClient;
 import java.awt.*;
 import java.awt.geom.*;
 import javax.swing.JPanel;

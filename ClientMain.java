@@ -1,9 +1,11 @@
-package DodgeBallClient;
+package dodgeBallClient;
 
 import java.awt.event.*;
 import java.awt.geom.*;
+import java.io.File;
 import java.io.IOException;
 import java.awt.*;
+import javax.sound.sampled.*;
 import javax.swing.*;
 
 public class ClientMain implements KeyListener, ActionListener{
@@ -37,6 +39,7 @@ public class ClientMain implements KeyListener, ActionListener{
 	public static final int SLOMO = 3;
 	public static final int SHRINK = 4;
 	public static final int SPEED = 5;
+	public static final int ASSASSIN = 6;
 	private static boolean pause;
 	private static boolean menuOn = true;
 	private static boolean weave;
@@ -51,6 +54,7 @@ public class ClientMain implements KeyListener, ActionListener{
 	private boolean left;
 	private boolean right;
 
+	//returns game info to send to server
 	public static byte[] sendInfo() {
 		//sends boolean received menuOn, userYou location to server
 		byte[] buf = new byte[7];
@@ -78,6 +82,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		return buf;
 	}
 
+	//Label: stores menuInfo from server
 	public static void storeMenuInfo(byte[] buf) {
 		final int SETTINGS = 0;
 		final int SCORES = 1;
@@ -93,6 +98,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		}
 	}
 
+	//Label:stores score from server
 	private static void storeScore(byte[] buf) {
 		int index = 1;
 		while(buf[index] != 0) {
@@ -109,12 +115,13 @@ public class ClientMain implements KeyListener, ActionListener{
 				wHighScore = thisScore;
 		}
 		regHighScore.setText("Survival High Score: " + highScore);
-		weaveHighScore.setText("Weave High Score: " + wHighScore);
+		//weaveHighScore.setText("Weave High Score: " + wHighScore);
 		//go to menu after scores received
 		frame.setTitle("Menu");
 		goToMenu();
 	}
 
+	//Label:stores other info from server
 	public static void storeInfo(byte[] buf) {
 		final int BALLS = 1;
 		final int INFO = 2;
@@ -152,6 +159,7 @@ public class ClientMain implements KeyListener, ActionListener{
 	private final static int menuInd = 32;
 	private final static int scoreInd = 33;
 
+	//Label: stores other extra info represented above from server
 	private static void storeExtraInfo(byte[] buf) {
 		int x = bytesToInt(buf, xInd);
 		int y = bytesToInt(buf, yInd);
@@ -171,6 +179,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		if(menuOn) {
 			Client.setPlaying(false);
 			t.stop();
+			playSound();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e1) {
@@ -185,6 +194,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		frame.setTitle("Score: " + bytesToInt(buf, scoreInd, index));
 	}
 
+	//Label:constructor
 	public ClientMain() {
 		pane = new Panel();
 		frame = new JFrame("Menu");
@@ -203,6 +213,7 @@ public class ClientMain implements KeyListener, ActionListener{
 	//for Panel class to access ClientMain methods without starting
 	public ClientMain(int doesntMatter){}
 
+	//Label: paint for Panel class
 	public static void paintStuff(Graphics g) {
 		if(!menuOn) {
 			if(wave) {
@@ -223,6 +234,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		}
 	}
 
+	//Label: for button and timers
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == button) {
 			new Thread() {
@@ -263,6 +275,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		}
 	}
 
+	//Label:key pressed
 	public void keyPressed(KeyEvent e) {
 		int key = e.getKeyCode();
 		//if moved
@@ -280,6 +293,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		}
 	}
 
+	//Label:key released
 	public void keyReleased(KeyEvent e) {
 		if(e.getKeyCode() == KeyEvent.VK_UP)
 			up = false;
@@ -291,6 +305,7 @@ public class ClientMain implements KeyListener, ActionListener{
 			right = false;
 	}
 
+	//Label:draws line for weave
 	private static void drawWeaveLine(Graphics2D g2) {
 		g2.setStroke(new BasicStroke(2f));
 		g2.setColor(Color.red);
@@ -300,6 +315,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		g2.draw(line);
 	}
 
+	//Label:draws thicker line for wave
 	private static void drawWaveLine(Graphics g) {
 		g.setColor(Color.red);
 		if(countDown == 1)
@@ -308,10 +324,12 @@ public class ClientMain implements KeyListener, ActionListener{
 			g.drawRect(0, frame.getHeight() / 2 - 22, frame.getWidth(), 60);
 	}
 
+	//Label:converts (the sum of the bytes in buf from startIndex to that + 6) to int
 	private static int bytesToInt(byte[] buf, int startIndex) {
 		return bytesToInt(buf, startIndex, startIndex + 6);
 	}
 
+	//Label: converts (the sum of the bytes in buf from startIndex to endIndex) to int
 	private static int bytesToInt(byte[] buf, int startIndex, int endIndex) {
 		int x = 0;
 		for(int i = startIndex; i < endIndex; i ++) {
@@ -323,6 +341,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		return x;
 	}
 
+	//Label: draws balls
 	private static void drawBalls(Graphics g) {
 		int diam = 55;
 		for(int i = 0; i < ballInfo.length - 2; i += 3) {
@@ -373,10 +392,17 @@ public class ClientMain implements KeyListener, ActionListener{
 					g.setColor(Color.yellow);
 					g.fillOval(x, y, diam, diam);
 				}
+				else if(type == ASSASSIN) {
+					g.setColor(Color.gray);
+					g.fillOval(x, y, diam, diam);
+					g.setColor(new Color(198, 134, 66));
+					g.fillOval(x, y + diam / 3, diam, diam / 5);
+				}
 			}	
 		}
 	}
 
+	//Label: makes menu
 	private void makeMenu() {
 		menuPane.setLayout(new BorderLayout());
 		JPanel scoresPane = new JPanel();
@@ -409,6 +435,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		frame.setVisible(true);
 	}
 
+	//Label: shows menu
 	private static void goToMenu() {
 		menuPane.setVisible(true);
 		frame.setSize(width, width);
@@ -416,6 +443,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		pane.setBackground(null);
 	}
 
+	//Label: starts game
 	private static void startGame() {
 		userA.setHairs(hairs1);
 		userYou.setHairs(hairs2);
@@ -425,6 +453,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		t.start();
 	}
 
+	//Label: shows if connected
 	public static void showConnected(boolean connected) {
 		connectPane.removeAll();
 		if(connected) {
@@ -439,6 +468,7 @@ public class ClientMain implements KeyListener, ActionListener{
 		frame.setVisible(true);
 	}
 
+	//Label: disconnects and shows menu
 	public static void disconnectToMenu() {
 		t.stop();
 		goToMenu();
@@ -449,9 +479,30 @@ public class ClientMain implements KeyListener, ActionListener{
 		frame.setVisible(true);
 	}
 
+	//Label: unused methods
 	public void mouseDragged(MouseEvent e) {}
 	public void keyTyped(KeyEvent e) {}
 
+	//Label: game over sound
+	private static void playSound() {
+		try {
+			AudioInputStream audioInputStream =
+					AudioSystem.getAudioInputStream(new
+							File("BabyElephantWalk60.wav").getAbsoluteFile());//XXX
+			Clip clip = AudioSystem.getClip();
+			clip.open(audioInputStream);
+			clip.start();
+			weaveHighScore.setText("playing");//XXX
+		}
+		catch(Exception ex) {
+			weaveHighScore.setText("error");//XXX
+			System.out.println("Error with playing sound.");
+			ex.printStackTrace();
+		}
+		frame.setVisible(true);//XXX
+	}
+
+	//Label: main
 	public static void main(String[] peepeepoopoo) {
 		new ClientMain();
 		//start path: button press-> run-> storeMenuInfo-> start
