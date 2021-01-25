@@ -11,10 +11,11 @@ public class Ball {
 	private int diameter;
 	private int dx;
 	private int dy;
+	private int type = -1;
 	private Color color;
 	private boolean bouncy = true;
 	private static boolean bouncyChecked;
-	private int type = -1;
+	private boolean solidYet = false;
 
 	public Ball() {
 		this(randomX(), randomY());
@@ -25,6 +26,7 @@ public class Ball {
 			dx = Math.random() < .5 ? 1 : -1;
 		if(dy == 0)
 			dy = Math.random() < .5 ? 1 : -1;
+		solidYet = true;
 	}
 
 	public Ball(int x, int y) {
@@ -43,14 +45,16 @@ public class Ball {
 		if(dy == 0)
 			dy = Math.random() < .5 ? 1 : -1;
 	}
-
-	public Ball(int dy, int y, boolean isWaveButAlsoDoesntReallyMatterThisIsJustToCallADifferentConstructor) {
+	//constructor for wave
+	public Ball(int dy, int y, boolean starterBall) {
 		this(randomX(), y);
 		this.dy = dy;
 		dx = 0;
 		//make initial dy not 0
 		if(dy == 0)
 			dy = Math.random() < .5 ? 1 : -1;
+		if(starterBall)
+			solidYet = true;
 	}
 
 	public static void setPane(JPanel p) {
@@ -101,6 +105,7 @@ public class Ball {
 		//bounces balls off each others
 		final int wackyInt = 0;
 		final int solidInt = 1;
+		boolean stillInParent = false;
 		for(index ++; index < balls.size(); index ++) {
 			int x2 = balls.get(index).getX();
 			int y2 = balls.get(index).getY();
@@ -108,21 +113,32 @@ public class Ball {
 			int disX = (x2 + d2/2) - (locX + diameter/2);
 			int disY = (y2 + d2/2) - (locY + diameter/2);
 			int radii = d2/2 + diameter/2;
+			//if collision
 			if ((disX * disX) + (disY * disY) < (radii * radii)) {
-				if(bounceType == wackyInt) {
-					dx = (int)(7 * Math.random() - 3);
-					dy = (int)(7 * Math.random() - 3);
-					break;
-				}
-				else if(bounceType == solidInt) {
-					int oldDx = dx;
-					int oldDy = dy;
-					dx = balls.get(index).dx;
-					dy = balls.get(index).dy;
-					int[] ballBouncedInfo = {index, oldDx, oldDy};
-					return ballBouncedInfo;
+				if(type == -1 && balls.get(index).getType() == -1) {
+					stillInParent = true;
+					if(bounceType == wackyInt) {
+						dx = (int)(7 * Math.random() - 3);
+						dy = (int)(7 * Math.random() - 3);
+						break;
+					}
+					//solid bounce: changes dx and dy of this ball, 
+					//and sends back index of other ball for clientserver to change to oldDx and oldDy
+					else if(bounceType == solidInt && solidYet && balls.get(index).isSolidYet()) {
+						//XXX not working
+						int oldDx = dx;
+						int oldDy = dy;
+						dx = balls.get(index).dx;
+						dy = balls.get(index).dy;
+						int[] ballBouncedInfo = {index, oldDx, oldDy};
+						return ballBouncedInfo;
+					}
 				}
 			}
+		}
+		//makes solid after ball has left parent Ball
+		if(!stillInParent) {
+			solidYet = true;
 		}
 		return null;
 	}
@@ -178,6 +194,12 @@ public class Ball {
 	}
 	public static void isBouncyChecked(boolean b) {
 		bouncyChecked = b;
+	}
+	public boolean isSolidYet() {
+		return solidYet;
+	}
+	public void setSolidYet() {
+		solidYet = true;
 	}
 }
 

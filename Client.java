@@ -8,6 +8,7 @@ public class Client {
 	private static byte[] locationInfo;
 	private static byte[] menuInfo = new byte[256];
 	private static int port = 4446;
+	private static int timeoutTimer = 0;
 	private static String ip;
 	private static Socket clientSocket;
 	private static DataInputStream in;
@@ -78,12 +79,16 @@ public class Client {
 					try {
 						socket.receive(packet);
 						ClientMain.storeInfo(packet.getData());
+						timeoutTimer = 0;
 					}
 					catch(SocketTimeoutException e) {
-						//XXX delete exception? timeout is ok to happen
-						connected = false;
-						playing = false;
-						ClientMain.disconnectToMenu();
+						//XXX potential fix for intercomputer playing, experiment with timeoutMax (50 now)
+						timeoutTimer ++;
+						if(timeoutTimer == 50) {
+							connected = false;
+							playing = false;
+							ClientMain.disconnectToMenu();
+						}
 					}
 				}
 			}

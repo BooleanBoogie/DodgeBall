@@ -107,9 +107,9 @@ public class PowerBall extends Ball{
 			g.fillOval(getX(), getY(), getDiameter(), getDiameter());
 		}
 		else if(type == ASSASSIN) {
-			g.setColor(Color.DARK_GRAY);
+			g.setColor(Color.gray);
 			if(sneakCounter > sneakMax)
-				g.setColor(Color.gray);
+				g.setColor(Color.DARK_GRAY);
 			g.fillOval(getX(), getY(), getDiameter(), getDiameter());
 			g.setColor(new Color(198, 134, 66));
 			g.fillOval(getX(), getY() + getDiameter() / 3, getDiameter(), getDiameter() / 5);

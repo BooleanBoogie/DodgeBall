@@ -332,7 +332,7 @@ public class CourtServer extends JPanel implements KeyListener, ActionListener{
 							balls.add(new Ball(b.getX(), b.getY()));
 						}
 						else
-							balls.add(new Ball(waveDy, frame.getHeight() / 2 - 22, true));
+							balls.add(new Ball(waveDy, frame.getHeight() / 2 - 22, false));
 						score += 20;
 					}
 					parentBallIndex ++;
